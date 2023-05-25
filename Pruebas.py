@@ -5,19 +5,39 @@ from selenium import webdriver
 from Funciones import funciones_isolucion
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import TimeoutException
+
 
 
 @pytest.fixture(scope='module')
 def driver():
-    ser = Service("C:\drivers\chromedriver.exe")
-    op = webdriver.ChromeOptions()
-    driver = webdriver.Chrome(service=ser, options=op)
-    driver.get("https://qa.isolucion.co/PaginaLogin.aspx")
-    driver.maximize_window()
-    f = funciones_isolucion(driver)
-    f.texto_multiple("id", "UserText", "administrador")
-    f.texto_multiple("id", "PasswordText", "12345")
-    f.click_multiple("id", "btnLogin")
+    try:
+        ser = Service("C:\drivers\chromedriver.exe")
+        op = webdriver.ChromeOptions()
+        driver = webdriver.Chrome(service=ser, options=op)
+        driver.get("https://qa.isolucion.co/PaginaLogin.aspx")
+        driver.maximize_window()
+        f = funciones_isolucion(driver)
+        element = driver.find_element(By.XPATH, "//a[contains(@id,'hplRecordarContrasenia')]")
+        txtol = element.text
+        txtbn = "Olvidó su contraseña"
+        assert txtol == txtbn, 'elemento de la pagina no encontrado olvido su contraseña'
+        element2 = driver.find_element(By.XPATH, "//a[contains(@id,'hplRecordarLogin')]")
+        txtre = element2.text
+        txtbn1 = "Olvidó su usuario"
+        assert txtre == txtbn1, "Elemento de la pagina no encontrado Olvido su usuario"
+        f.texto_multiple("id", "UserText", "administrador")
+        f.texto_multiple("id", "PasswordText", "12345")
+        f.click_multiple("id", "btnLogin")
+    except TimeoutException as ex:
+        error = str(ex)
+        print(f"se excedio el tiempo para la ejecutacion del test " + error)
+    except AssertionError as ex:
+        error = str(ex)
+        print(f"Error de aserción: " + error)
+    except Exception as ex:
+        error = str(ex)
+        print(f"No se pudo ejecutar el test: " + error)
     yield driver
     print("test finalizado")
 
@@ -28,8 +48,15 @@ def test_uno(driver):
         f = funciones_isolucion(driver)
         bt1 = driver.find_element(By.XPATH, "//a[contains(.,'Tareas')]")
         bt1.click()
+        tarea = bt1.text
+        bt7 = "Tareas"
+        assert bt7 == tarea, "el boton tarea no exite"
         bt2 = driver.find_element(By.XPATH, "(//div[contains(.,'Agendar tareas')])[5]")
         bt2.click()
+        titulo = driver.find_element(By.XPATH, "//span[contains(@id,'lblTitulo')][@class='EtiquetaTitulo'][contains(.,'Agendar Tareas')]")
+        bt8 = titulo.text
+        bt9 = "Agendar Tareas"
+        assert bt9 == bt8, "No se encontro el titulo de agendar tareas"
         f.select_xpath_type("xpath", "text", "//select[@id='ContentPlaceHolder1_ddlTipoTarea']", "Tarea Genérica")
         f.texto_multiple("id", "ContentPlaceHolder1_txtNomTarea", "PruebaQA5")
         f.texto_multiple("id", "ContentPlaceHolder1_txtDescripcion", "Descripcion de la tarea creada.")
@@ -43,10 +70,15 @@ def test_uno(driver):
         f.click_multiple("id", "ContentPlaceHolder1_btnGrabar")
         time.sleep(10)
         print("Tarea Creada con exito.")
+    except TimeoutException as ex:
+        error = str(ex)
+        print(f"se excedio el tiempo para la ejecutacion del test " + error)
+    except AssertionError as ex:
+        error = str(ex)
+        print(f"Error de aserción: " + error)
     except Exception as ex:
-        print(ex)
-        print("No se pudo ejecutar el test")
-
+        error = str(ex)
+        print(f"No se pudo ejecutar el test: " + error)
 
 @pytest.mark.Documento
 def test_dos(driver):
@@ -54,8 +86,7 @@ def test_dos(driver):
         f = funciones_isolucion(driver)
         bt3 = driver.find_element(By.XPATH, "//a[@class='dropdown-toggle'][contains(.,'Documentacion')]")
         bt3.click()
-        btn4 = driver.find_element(By.XPATH,
-                                   "(//div[contains(.,'Administración de los documentos del sistema de gestión.')])[4]")
+        btn4 = driver.find_element(By.XPATH,"(//div[contains(.,'Administración de los documentos del sistema de gestión.')])[4]")
         btn4.click()
         f.click_multiple('xpath', "//a[contains(@id,'1')][@class='LinkPestania'][contains(.,'Nuevo')]")
         f.click_multiple('xpath', "//i[contains(@class,'fa fa-file-text fa-3x')]")
@@ -69,10 +100,15 @@ def test_dos(driver):
         f.click_multiple('id', 'ContentPlaceHolder1_btnGrabar')
         time.sleep(10)
         print('Documento creado con exito')
+    except TimeoutException as ex:
+        error = str(ex)
+        print(f"se excedio el tiempo para la ejecutacion del test " + error)
+    except AssertionError as ex:
+        error = str(ex)
+        print(f"Error de aserción: " + error)
     except Exception as ex:
-        print(ex)
-        print("No se pudo ejecutar el test")
-
+        error = str(ex)
+        print(f"No se pudo ejecutar el test: " + error)
 
 @pytest.mark.Cargue
 def test_tres(driver):
@@ -91,9 +127,15 @@ def test_tres(driver):
         f.click_multiple('xpath', "//a[contains(@id,'btnpaso3')]")
         f.click_multiple('xpath', "//a[contains(@id,'ContentPlaceHolder1_lnSubirArchivo1')]")
         print("Se ha realizado un cargue.")
+    except TimeoutException as ex:
+        error = str(ex)
+        print(f"se excedio el tiempo para la ejecutacion del test " + error)
+    except AssertionError as ex:
+        error = str(ex)
+        print(f"Error de aserción: " + error)
     except Exception as ex:
-        print(ex)
-        print("No se pudo ejecutar el test")
+        error = str(ex)
+        print(f"No se pudo ejecutar el test: " + error)
 
 
 @pytest.mark.ltdoDeDmtos
@@ -102,17 +144,22 @@ def test_cuatro(driver):
         f = funciones_isolucion(driver)
         bt3 = driver.find_element(By.XPATH, "//a[@class='dropdown-toggle'][contains(.,'Documentacion')]")
         bt3.click()
-        btn4 = driver.find_element(By.XPATH,
-                                   "(//div[contains(.,'Administración de los documentos del sistema de gestión.')])[4]")
+        btn4 = driver.find_element(By.XPATH,"(//div[contains(.,'Administración de los documentos del sistema de gestión.')])[4]")
         btn4.click()
         f.texto_multiple('xpath', "//input[contains(@id,'txtBuscarAZ')]", "DocumentoPruebaQA")
         f.click_multiple("xpath", "//input[contains(@id,'imbBuscarBuscardorAZ')]")
         f.click_multiple("id", "ContentPlaceHolder1_gvLista_imgVistaPrevia_0")
         print("Se realizo la vista previa del documento de forma exitosa")
         time.sleep(10)
+    except TimeoutException as ex:
+        error = str(ex)
+        print(f"se excedio el tiempo para la ejecutacion del test " + error)
+    except AssertionError as ex:
+        error = str(ex)
+        print(f"Error de aserción: " + error)
     except Exception as ex:
-        print(ex)
-        print("No se pudo ejecutar el test")
+        error = str(ex)
+        print(f"No se pudo ejecutar el test: " + error)
 
 
 @pytest.mark.ltdotareas
@@ -129,23 +176,12 @@ def test_cinco(driver):
         f.click_multiple("xpath", "//input[contains(@id,'ContentPlaceHolder1_btnGrabar')]")
         time.sleep(5)
         print("la tarea a sido gestionada con Exito")
+    except TimeoutException as ex:
+        error = str(ex)
+        print(f"se excedio el tiempo para la ejecutacion del test " + error)
+    except AssertionError as ex:
+        error = str(ex)
+        print(f"Error de aserción: " + error)
     except Exception as ex:
-        print(ex)
-        print("No se pudo ejecutar el test")
-
-@pytest.mark.prueba
-def test_prueba(driver):
-    print("prueba")
-
-#Gina comentario
-#Comentario 2
-#comentario Diego
-
-#Gina comentario
-#Comentario 2
-
-#diego
-#Diego2
-
-
-#Gina comentario luego de Diego
+        error = str(ex)
+        print(f"No se pudo ejecutar el test: " + error)
